@@ -37,12 +37,8 @@ while (t <= opt.nb_iter)
     end
     
     % Learning of the noise if activated
-    if (opt.option_noise == 1)
-        n_and_e = n_and_e.learn_noise(Y,W_new,V_new);
-        n_and_e.var_noise = dumping(n_and_e.var_noise_old, n_and_e.var_noise, opt.dump_learn);
-        n_and_e.var_noise_old = n_and_e.var_noise;
-    end
-    
+    if (opt.option_noise == 1); n_and_e = n_and_e.learn_noise(Y,W_new,V_new); end
+            
     % print infos to screen
     if ((opt.print > 0) && (mod(t, opt.print) == 0) ); print_to_screen(); end
     
