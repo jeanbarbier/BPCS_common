@@ -20,7 +20,7 @@
 %
 %
 % Syntax :
-% [results, n_and_e, varargout] = CSBP_Solver(Y,G,opt);
+% [X, varargout] = CSBP_Solver(Y,G,opt);
 %
 % Inputs :
 %
@@ -141,21 +141,25 @@
 %
 % Outputs :
 %
-% results -             Structure field containing the final results about the reconstruction of the signal and its parameters.     
+% X                     The estimated signal
+%
+% varargout{1} -        Structure field containing the final results about the reconstruction of the signal and its parameters.     
 %  
-%   .av_mess            final signal estimate as a column vector.
+%   .av_mess            The estimated signal (like X).
 %
 %   .param_1/2/3/4      prior-dependent parameters learned (of required), see below.
 %
 %   .rho                estimated density of non zero components (or of the big components in the '2Gauss' case).
 %
-% n_and_e -             Structure field containing the final results about the noise and the reconstruction error.  
+% varargout{2} -        Structure field containing the final results about the noise and the reconstruction error.  
 %
 %   .var_noise          estimated variance vector of the noise.
 %
 %   .true_error         mean squarred error of the reconstructed signal with respect to the original one if given.
 %
-% varargout{1}          MSE of the reconstruction as a function of the iterations.
+% varargout{3}          MSE of the reconstruction as a function of the iterations.
+%
+% varargout{4}          MSE by block as a function of time if use of the seeding strategy (matrix/operator by block)
 %
 %
 % Prior-dependent parameters :

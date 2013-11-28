@@ -1,4 +1,4 @@
-function [prior, n_and_e, varargout] = CSBP_Solver(Y, G, opt)
+function [X, varargout] = CSBP_Solver(Y, G, opt)
 check_size();
 set_parameters();
 display_information();
@@ -38,7 +38,7 @@ while (t <= opt.nb_iter)
     
     % Learning of the noise if activated
     if (opt.option_noise == 1); n_and_e = n_and_e.learn_noise(Y,W_new,V_new); end
-            
+    
     % print infos to screen
     if ((opt.print > 0) && (mod(t, opt.print) == 0) ); print_to_screen(); end
     
@@ -63,8 +63,11 @@ end
 close(gcf);
 
 % can output the MSE a function of iterations
-if (max(size(opt.signal) ) > 2); varargout{1} = MSEt; end
-if ((opt.MSEbyBlock > 0) && (opt.numBlockC > 1) ); varargout{2} = MSEblocks;
-else varargout{2} = []; end
+varargout{1} = prior;
+varargout{2} = n_and_e;
+if (max(size(opt.signal) ) > 2); varargout{3} = MSEt; end
+if ((opt.MSEbyBlock > 0) && (opt.numBlockC > 1) ); varargout{4} = MSEblocks; end
+
+X = prior.av_mess;
 
 end

@@ -19,4 +19,4 @@ G = randn(ceil(measure_rate .* size), size);
 Y = G * S';
 
 % algorithm
-[results, n_and_e] = CSBP_Solver(Y,G,My);
+X = CSBP_Solver(Y,G,My);
