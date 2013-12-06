@@ -6,6 +6,7 @@ initialisation();
 
 % Construction of the prior dependent class and noise_and_error
 prior = Prior(opt.signal_rho, N, measure_rate, opt.learn, opt.prior, opt.dump_learn, R_init, S2_init, av_mess_init, var_mess_init, opt.method, prior_param{1}, prior_param{2}, prior_param{3}, prior_param{4}); F = str2func(prior.func);
+if (opt.adaptDump == 1); priorTry = prior; end
 n_and_e = noise_and_error(opt.conv, opt.var_noise, opt.dump_learn);
 
 t = 1; print_to_screen();
@@ -53,7 +54,7 @@ while (t <= opt.nb_iter)
     % MSE as a function of the iterations, to be compared with density evolution
     if (max(size(opt.signal) ) > 2)
         MSEt(t + 1) = n_and_e.true_error;
-        if ((isnan(n_and_e.true_error) == 1) || (n_and_e.true_error > 1e5) ); error('The algorithm did not converge'); end
+        %         if ((isnan(n_and_e.true_error) == 1) || (n_and_e.true_error > 1e5) ); error('The algorithm did not converge'); end
     end
     
     t = t + 1;

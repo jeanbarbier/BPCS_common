@@ -70,6 +70,8 @@
 %
 %   .alphaBig           Must be equal to one if alpha (measurement rate >=1). [0]
 %
+%   .adaptDump          Adaptative dumping (for the moment, only for 'SparseGauss' or '2Gauss' prior with 'AMP' method). [0]
+%
 %   .prior              prior on the data. ['SparseGauss']
 %                       'SparseGauss' : Gaussian sparse prior : p(x) ~ (1 - rho) * delta(x) + rho / sqrt(2 * pi * var_gauss) * exp(-(x - m_gauss)^2 / (2 * var_gauss) ) : param_1 = m_gauss; param_2 = var_gauss;
 %                       'SparseGaussCut' : Gaussian sparse prior enforcing value inside a symetric interval : p(x) ~ [(1 - rho) * delta(x) + rho / sqrt(2 * pi * var_gauss) * exp(-(x - m_gauss)^2 / (2 * var_gauss) )] * I(|x| < cut) : param_1 = m_gauss; param_2 = var_gauss; param_3 = cut;
@@ -134,6 +136,7 @@ opt.varG = [];
 opt.method = 'AMP';
 opt.MSEbyBlock = 0;
 opt.alphaBig = 0;
+opt.adaptDump = 0;
 
 % SparseGauss
 opt.m_gauss = 0;

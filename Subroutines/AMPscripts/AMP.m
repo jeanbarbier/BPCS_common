@@ -52,5 +52,6 @@ if (opt.save_memory == 1)
     end
 end
 
-prior.R = var_2 ./ var_1 + prior.av_mess; prior.S2 = 1 ./ var_1; prior = F(prior); V = V_new; W = W_new;
+if (opt.adaptDump == 1); adaptDampingIterationPrior();
+else prior.R = var_2 ./ var_1 + prior.av_mess; prior.S2 = 1 ./ var_1; prior = F(prior); V = V_new; W = W_new; end
 % Iteration done ----
