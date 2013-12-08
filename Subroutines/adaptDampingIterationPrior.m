@@ -1,8 +1,9 @@
 % adaptive damping procedure
 
-opt.dump_mes = 0.;
+% opt.dump_mes = 0.;
 
-if (t==1)
+if (t == 1)
+    priorTry = prior;
     priorTry.R = var_2 ./ var_1 + prior.av_mess;
     priorTry.S2 = 1 ./ var_1;
     
@@ -23,7 +24,7 @@ if (t==1)
     
 else
     
-    notok=1;
+    notok = 1;
     while (notok == 1)
         priorTry.R = (1 - opt.dump_mes) * (var_2 ./ var_1 + prior.av_mess) + opt.dump_mes * prior.R;
         priorTry.S2 = (1 - opt.dump_mes) * (1 ./ var_1) + opt.dump_mes * prior.S2;
@@ -43,10 +44,9 @@ else
         DL = Part_1 + Part_2;
         FreeEntropy = loglike  + sum(DL) / N;
         
-        if ((FreeEntropy - FreeEntropy_OLD) / abs(FreeEntropy_OLD) > -0.2); notok=0;
-        else opt.dump_mes = opt.dump_mes + (1 - opt.dump_mes) / 2; end
-        
-        if (opt.dump_mes > 1 - 1e-6); notok=0; end
+        if ((FreeEntropy_OLD - FreeEntropy) / abs(FreeEntropy_OLD) < 0.2); notok = 0;
+        else opt.dump_mes = opt.dump_mes + (1 - opt.dump_mes) / 2; end        
+        if (opt.dump_mes > 1 - 1e-6); notok = 0; end
     end
 end
 

@@ -6,7 +6,6 @@ initialisation();
 
 % Construction of the prior dependent class and noise_and_error
 prior = Prior(opt.signal_rho, N, measure_rate, opt.learn, opt.prior, opt.dump_learn, R_init, S2_init, av_mess_init, var_mess_init, opt.method, prior_param{1}, prior_param{2}, prior_param{3}, prior_param{4}); F = str2func(prior.func);
-if (opt.adaptDump == 1); priorTry = prior; end
 n_and_e = noise_and_error(opt.conv, opt.var_noise, opt.dump_learn);
 
 t = 1; print_to_screen();

@@ -1,5 +1,7 @@
 % Generic AMP for real numbers
 
+if (opt.adaptDump == 1); opt.dump_mes = 0; end;
+
 if (opt.save_speed == 1)
     if (opt.remove_mean == 0)
         V_new = (G2 * prior.var_mess.').';
