@@ -9,8 +9,6 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% PROBLEM AND PARAMETERS DEFINITION
 
-if(numBlockC > 1); if (alphaCs(1) < alphaCs(2) ); error('The first block must have a measurement rate bigger or equal to the one of the bulk blocks'); end; end
-
 close all; clear; load line_BP.mat;
 
 %% problem parameters
@@ -38,6 +36,8 @@ My.conv = 1e-6; % convergence accuracy
 My.dump_mes = 0.5; % dumping
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%% NO MODIFICATIONS AFTER THIS LINE ARE REQUIRED
+
+if(numBlockC > 1); if (alphaCs(1) < alphaCs(2) ); error('The first block must have a measurement rate bigger or equal to the one of the bulk blocks'); end; end
 
 %% creation of the signal
 if (strcmp(type, 'complex') ); S = S_SparseGaussComplex(N, rho, mGauss, varGauss);
