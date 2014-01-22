@@ -10,7 +10,7 @@ classdef Prior
         % Binary prior : p(x) ~ (1 - rho) * delta(x) + rho * delta(x - 1);
         % Exponential sparse prior : p(x) ~ (1 - rho) * delta(x) + rho * I(x > 0) * exp(-expo * x), expo > 0 : param_1 = expo;
         % Unity inside a finite interval sparse prior : p(x) ~ (1 - rho) * delta(x) + rho * I(c_down < x < c_up) : param_1 = c_down; param_2 = c_up;
-        % Laplace prior : p(x) ~ 2 / beta * exp{-beta * |x|} : param_1 = beta;
+        % Laplace prior : p(x) ~ beta / 2 * exp{-beta * |x|} : param_1 = beta;
         % L1 optimization (soft tresholding) : p(x) ~ lim_{beta -> infinity} exp{-beta * |x|}, where the x values are bounded by [min, max] : param_1 = min; param_2 = max;
         % Plus or minus one prior with fraction half of each : p(x) ~ 0.5 * delta(x - 1) + 0.5 * delta(x + 1);
         % Complex Sparse Gaussian prior (x complex number) : p(x) ~ (1 - rho) * delta(x) + rho / sqrt(2 * pi * var_gauss) * exp(-(|x| - m_gauss)^2 / (2 * var_gauss) ) : param_1 = m_gauss; param_2 = var_gauss;
@@ -236,7 +236,7 @@ classdef Prior
         end
         
         function prior = PriorLap(prior)
-            % Laplace prior : p(x) ~ 2 / beta * exp{-beta * |x|} : param_1 = beta;
+            % Laplace prior : p(x) ~ beta / 2 * exp{-beta * |x|} : param_1 = beta;
             prior.av_mess_old = prior.av_mess; beta_ = prior.param_1;
             R_ = prior.R; S2_ = prior.S2;
             erfc_p = erfc((R_ + beta_ .* S2_) ./ sqrt(2 .* S2_) );
