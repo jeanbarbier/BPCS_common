@@ -84,7 +84,7 @@ tic; [results, n_and_e, MSEtAlgo, MSEblockAlgo] = CSBP_Solver(Y, [], My); toc;
 plotDensityEvolutionHadamardFourier(); drawnow; hold on;
 
 %% comparison with random matrix
-if ((N <= 1e15) && (trueMat == 1) )
+if ((N <= 2^15) && (trueMat == 1) )
     My.save_memory = 1; My.save_speed = 0;
     if (strcmp(type, 'complex') ); My.method = 'AMPcomplex'; else My.method = 'AMP'; end
     G = createSeededRandomMatrix(type, J, Mblock, Nblock); % creation of the seeded matrix
