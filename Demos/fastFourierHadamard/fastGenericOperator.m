@@ -12,13 +12,13 @@ close all; clear; load line_BP.mat;
 
 %% problem parameters
 type = 'real'; % type of the signal : 'real' (will use an Hadamard based operator) or 'complex' (will use a Fourier based operator)
-N = 2^13; % size of the signal (POWER OF 2 if type = 'real')
+N = 2^14; % size of the signal (POWER OF 2 if type = 'real')
 rho = 0.1; % ..and it's density/sparsity
 [a, closest] = min(abs(rho - line_BP(1,:) ) );
 mGauss = 0; % mean of the real signal or of the real and imaginary parts of the complex one
 varGauss = 1; % variance of the real signal or of the real and imaginary parts of the complex one
 alphaGlobal = 0.25; % global measurement rate (the true rate will be a little bit different)
-numBlockC = 8; % number of blocks for the columns of the seeding matrix ( >= 2 for seeding, = 1 for full operator), it must divide N (POWER OF 2 if type = 'real')
+numBlockC = 1; % number of blocks for the columns of the seeding matrix ( >= 2 for seeding, = 1 for full operator), it must divide N (POWER OF 2 if type = 'real')
 w = 1; % coupling window (number of sub-diagonal blocks)
 if (numBlockC == 1); JJ = 1; else JJ = 0.1^2; end % variance of the elements of the blocks/coupling strenght
 if (numBlockC == 1); numBlockL = 1; else numBlockL = numBlockC + w - 1; end % number of blocks for the rows of the seeding matrix
@@ -32,7 +32,7 @@ My = CSBP_Solver_Opt();
 My.nb_iter = 300; % max number of iterations
 My.print = 1; % frequency of printing results
 My.conv = 1e-5; % convergence accuracy
-My.dump_mes = 0.5; % dumping
+My.dump_mes = 0.; % dumping (help to make the algorithm converge, but the Density Evolution will not agree anymore)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%% NO MODIFICATIONS AFTER THIS LINE ARE REQUIRED
 
@@ -78,7 +78,7 @@ My.var_noise
 if (My.var_noise > 0); Y = Y + randn(size(Y) ) .* sqrt(My.var_noise); end
 
 %% reconstruction
-tic; [results, n_and_e, MSEtAlgo, MSEblockAlgo] = CSBP_Solver(Y, [], My); toc;
+tic; [X, results, n_and_e, MSEtAlgo, MSEblockAlgo] = CSBP_Solver(Y, [], My); toc;
 
 %% density evolution
 plotDensityEvolutionHadamardFourier(); drawnow; hold on;
@@ -90,7 +90,7 @@ if ((N <= 2^15) && (trueMat == 1) )
     G = createSeededRandomMatrix(type, J, Mblock, Nblock); % creation of the seeded matrix
     Y = G * S.';
     if (My.var_noise > 0); Y = Y + randn(size(Y) ) .* sqrt(My.var_noise); end
-    tic; [results, n_and_eR, MSEtAlgoR, MSEblockAlgoR] = CSBP_Solver(Y, G, My); toc; % reconstruction
+    tic; [X, results, n_and_eR, MSEtAlgoR, MSEblockAlgoR] = CSBP_Solver(Y, G, My); toc; % reconstruction
     if (numBlockC > 1)  % plot
         for c = 1 : numBlockC; blocAlgoR(1, c) = MSEblockAlgoR{1}(c); end
         for (t = 1 : max(size(MSEtAlgoR) ) )

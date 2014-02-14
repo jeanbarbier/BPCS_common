@@ -6,6 +6,10 @@
 3.) Deletion of useless routines.
 4.) New priors and AMP scripts
 
+14/02/14 Jean Barbier
+1.) Adding the routines and demo for our Superposition codes scheme (see article)
+2.) corrections of some small mistakes
+
 ------- Old version
 %CSBP_solver version 3.0, february 2013
 18/02/13 Jean Barbier

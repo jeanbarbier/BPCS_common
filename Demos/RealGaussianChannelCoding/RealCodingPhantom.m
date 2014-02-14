@@ -15,9 +15,9 @@ clear all; close all;
 %% problem parameters
 N = 32.^2; % size of the phantom (power of 2, N >= 64^2 becomes very demanding in memory)
 hadamard = 1; % do you want to use hadamard matrix (way more fast) or gaussian one?
-seeded = 1; % seeded or homogeneous matrix (if seeded = 0)? for both there are random and hadamard matrices
+seeded = 0; % seeded or homogeneous matrix (if seeded = 0)? for both there are random and hadamard matrices
 rho_corrupt = 0.1; % density of the big noise
-alphaGlobal = 0.25; % measurement rate
+alphaGlobal = 0.3; % measurement rate
 var_small = 1e-6; % variance of the small additive gaussian noise
 if (seeded == 1)
     JJ = 0.1.^2; % variance parameter between the blocks
@@ -31,8 +31,8 @@ else
 end
 
 %% algorithm properties
-nb_iter = 300; % maximum number of iterations
-print = 1; % printing frequency
+nb_iter = 100; % maximum number of iterations
+print = 10; % printing frequency
 dump_mes = 0.5; % dumping
 save_ = 0; % if you want to save the results, save_ = 1
 
@@ -129,15 +129,15 @@ My.var_2_gauss = 1 + var_small;
 
 %% AMP decoding with 2Gauss prior
 My.prior = '2Gauss';
-if (hadamard == 0); [results2G, n_and_e] = CSBP_Solver(Y_null, F, My); else [results2G, n_and_e] = CSBP_Solver(Y_null, [], My); end;
-Y_CS = Y_err - results2G.av_mess';
+if (hadamard == 0); [X1, results2G, n_and_e] = CSBP_Solver(Y_null, F, My); else [X1, results2G, n_and_e] = CSBP_Solver(Y_null, [], My); end;
+Y_CS = Y_err - X1.';
 X_CS = A.' \ Y_CS; X_CS_(rp) = X_CS(1:max(size(X_CS) ) - comp, 1); X_CS = X_CS_.';
 
 %% L1
 if (l1_AMP == 1)
     My.prior = 'L1';
-    if (hadamard == 0); [resultsL1, n_and_e] = CSBP_Solver(Y_null, F, My); else [resultsL1, n_and_e] = CSBP_Solver(Y_null, [], My); end;
-    Y_L1 = Y_err - resultsL1.av_mess';
+    if (hadamard == 0); [X2, resultsL1, n_and_e] = CSBP_Solver(Y_null, F, My); else [X2, resultsL1, n_and_e] = CSBP_Solver(Y_null, [], My); end;
+    Y_L1 = Y_err - X2.';
     X_L1 = A.' \ Y_L1; X_L1_(rp) = X_L1(1 : max(size(X_L1) ) - comp, 1); X_L1 = X_L1_.';
 else
     err_L1 = l1dantzig_pd(F * Y_null, F', [], Y_null, 3e-3, 1e-2, 1000); % Dantzig selector

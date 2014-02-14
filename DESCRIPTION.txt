@@ -17,6 +17,7 @@
 % 'L1' : L1 optimization (soft tresholding) : p(x) ~ lim_{beta -> infinity} exp{-beta * |x|}, where the x values are bounded by [min, max]
 % 'Binary1' : Plus or minus one prior with fraction half of each : p(x) ~ 0.5 * delta(x - 1) + 0.5 * delta(x + 1);
 % 'Complex' : Complex prior (x complex number) : p(x) ~ (1 - rho) * delta(x) + rho / sqrt(2 * pi * var_gauss) * exp(-(|x| - m_gauss)^2 / (2 * var_gauss) )
+% 'SuperpositionCode' : prior for the decoder in the superposition code scheme where the signal of size N = L * B has only one non zero value per block of size B (L blocks), see the associated article. 
 %
 %
 % Syntax :
@@ -175,6 +176,7 @@
 % 'Laplace' : param_1 = beta;
 % 'L1' : param_1 = min; param_2 = max;
 % 'Complex' : param_1 = m_gauss; param_2 = var_gauss;
+% 'SuperpositionCode' : param_1 = B; vector of size L (number of the blocks of size B) containing the L non zero values in order
 %
 %
 % Example : BasicExample.m 

@@ -30,6 +30,8 @@ switch opt.prior
         prior_param{1} = NaN; prior_param{2} = NaN; prior_param{3} = NaN; prior_param{4} = NaN;
     case 'Complex'
         prior_param{1} = opt.m_gaussComp; prior_param{2} = opt.var_gaussComp; prior_param{3} = NaN; prior_param{4} = NaN;
+    case 'SuperpositionCode'
+        prior_param{1} = opt.NbSC; prior_param{2} = opt.nonZeroValues; prior_param{3} = NaN; prior_param{4} = NaN;
     otherwise
         disp('unknown prior')
 end

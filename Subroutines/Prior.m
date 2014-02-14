@@ -2,25 +2,27 @@ classdef Prior
     % This class contains all the prior-dependent functions including learnings
     
     properties
-        av_mess; av_mess_old; var_mess; var_mess_old; R; S2; rho; learn; N; alpha; func; dump_learn; t; method; param_1; param_2; param_3; param_4;
+        av_mess; av_mess_old; var_mess; var_mess_old; R; S2; rho; learn; N; alpha; func; dump_learn; t; method; param_1; param_2; param_3; param_4; Z; mSC; NbSC;
         % Gaussian sparse prior : p(x) ~ (1 - rho) * delta(x) + rho / sqrt(2 * pi * var_gauss) * exp(-(x - m_gauss)^2 / (2 * var_gauss) ) : param_1 = m_gauss; param_2 = var_gauss;
         % Gaussian sparse prior enforcing value inside a symetric interval : p(x) ~ [(1 - rho) * delta(x) + rho / sqrt(2 * pi * var_gauss) * exp(-(x - m_gauss)^2 / (2 * var_gauss) )] * I(|x| < cut) : param_1 = m_gauss; param_2 = var_gauss; param_3 = cut;
         % Positive Gaussian sparse prior : p(x) ~ (1 - rho) * delta(x) + rho / sqrt(2 * pi * var_gauss) * exp(-(x - m_gauss)^2 / (2 * var) ) * I(x > 0) : param_1 = m_gauss; param_2 = var_gauss;
         % Mixture of two gaussians : p(x) ~ (1 - rho) * exp(-(x - m_1)^2 / (2 * var_1) ) / sqrt(2 * pi * var_1) + rho * exp(-(x - m_2)^2 / (2 * var_2) ) / (sqrt(2 * pi * var_2) ) : param_1 = m_1; param_2 = m_2; param_3 = var_1; param_4 = var_2;
         % Binary prior : p(x) ~ (1 - rho) * delta(x) + rho * delta(x - 1);
         % Exponential sparse prior : p(x) ~ (1 - rho) * delta(x) + rho * I(x > 0) * exp(-expo * x), expo > 0 : param_1 = expo;
+        % Gauss-Exponential prior : p(x) ~ exp(-(x - mG)^2 / (2 * varG) ) / sqrt(2 * pi * varG) + rho * I(x > 0) * exp(-expo * x), expo > 0 : param_1 = expo; param_2 = mG; param_3 = varG;
         % Unity inside a finite interval sparse prior : p(x) ~ (1 - rho) * delta(x) + rho * I(c_down < x < c_up) : param_1 = c_down; param_2 = c_up;
         % Laplace prior : p(x) ~ beta / 2 * exp{-beta * |x|} : param_1 = beta;
         % L1 optimization (soft tresholding) : p(x) ~ lim_{beta -> infinity} exp{-beta * |x|}, where the x values are bounded by [min, max] : param_1 = min; param_2 = max;
         % Plus or minus one prior with fraction half of each : p(x) ~ 0.5 * delta(x - 1) + 0.5 * delta(x + 1);
         % Complex Sparse Gaussian prior (x complex number) : p(x) ~ (1 - rho) * delta(x) + rho / sqrt(2 * pi * var_gauss) * exp(-(|x| - m_gauss)^2 / (2 * var_gauss) ) : param_1 = m_gauss; param_2 = var_gauss;
+        %SuperpositionCode : prior for the decoder in the superposition code scheme where the signal of size N = L * B has only one non zero value per block of size B (L blocks), see the associated article.
     end
     
     methods
         
         function prior = Prior(rho_init, N, alpha, learn, choice_prior, dump_learn, R_init, S2_init, av_mess_init, var_mess_init, method, varargin)
             % Constructor function
-            prior.R = R_init; prior.S2 = S2_init; prior.rho = rho_init; prior.learn = learn; prior.N = N; prior.alpha = alpha; prior.av_mess = av_mess_init; prior.av_mess_old = av_mess_init; prior.var_mess = var_mess_init; prior.var_mess_old = var_mess_init; prior.dump_learn = dump_learn; prior.method = method;
+            prior.R = R_init; prior.S2 = S2_init; prior.rho = rho_init; prior.learn = learn; prior.N = N; prior.alpha = alpha; prior.av_mess = av_mess_init; prior.av_mess_old = av_mess_init; prior.var_mess = var_mess_init; prior.var_mess_old = var_mess_init; prior.dump_learn = dump_learn; prior.method = method; prior.Z = 0;
             
             switch choice_prior
                 case 'SparseGauss'
@@ -51,6 +53,12 @@ classdef Prior
                     prior.param_1 = varargin{1};
                     prior.func = 'PriorSE';
                     disp('SparseExponential')
+                case 'GaussExponential'
+                    prior.param_1 = varargin{1};
+                    prior.param_2 = varargin{2};
+                    prior.param_3 = varargin{3};
+                    prior.func = 'PriorGE';
+                    disp('GaussExponential')
                 case 'SparseConstant'
                     prior.param_1 = min(varargin{1},varargin{2});
                     prior.param_2 = max(varargin{1},varargin{2});
@@ -76,6 +84,14 @@ classdef Prior
                     prior.param_2 = varargin{2};
                     prior.func = 'PriorComplex';
                     disp('Complex')
+                case 'SuperpositionCode'
+                    prior.param_1 = varargin{1};
+                    prior.param_2 = varargin{2};
+                    prior.param_3 = [];
+                    for l = 1 : max(size(prior.av_mess) ) / prior.param_1
+                        prior.param_3 = [prior.param_3, ones(1, prior.param_1) * prior.param_2(l) ];
+                    end
+                    prior.func = 'PriorSuperCode';
                 otherwise
                     disp('unknown prior')
             end
@@ -211,6 +227,32 @@ classdef Prior
                 if (prior.rho > prior.alpha); prior.rho = prior.alpha; end;
             end
             % learn OK
+            prior.Z = Z;
+        end
+        
+        function prior = PriorGE(prior)
+            % Gauss-Exponential prior : p(x) ~ exp(-(x - mG)^2 / (2 * varG) ) / sqrt(2 * pi * varG) + rho * I(x > 0) * exp(-expo * x), expo > 0 : param_1 = expo; param_2 = mG; param_3 = varG;
+            R_ = prior.R; S2_ = prior.S2; rho_ = prior.rho; expo_ = prior.param_1; mG = prior.param_2; varG = prior.param_3; N_ = prior.N;
+            prior.av_mess_old = prior.av_mess;
+            a = exp(-R_.^2 ./ (2 .* S2_) );
+            expo1 = exp(-.5 .* (R_ - mG).^2 ./ (varG + S2_) );
+            f1 = 1 ./ sqrt(2 .* pi .* (varG + S2_) ) .* expo1;
+            g1 = (mG .* S2_ + R_ .* varG) ./ (varG + S2_) .* f1;
+            h1 = 1 ./ sqrt(2 .* pi .* varG .* S2_) .* (1 ./ varG + 1 ./ S2_).^(-3 ./ 2) .* (1 + (mG ./ varG + R_ ./ S2_).^2 ./ (1 ./ varG + 1 ./ S2_) ) .* expo1;
+            b = exp(-expo_ .* R_ + expo_.^2 .* S2_ ./ 2);
+            c = erfc((expo_ .* sqrt(S2_) - R_ ./ sqrt(S2_) ) ./ sqrt(2) );
+            Z = f1 + rho_ .* b ./ 2 .* c;
+            prior.av_mess = (g1 + rho_ .*  (sqrt(S2_ ./ (2 .* pi) ) .* a + (R_ - expo_ .* S2_) ./ 2 .* b .* c) ) ./ Z;
+            f_b = (h1 + rho_ .* (S2_ ./ sqrt(2 .* pi) .* (-expo_ .* sqrt(S2_) + R_ ./ sqrt(S2_) ) .* a + b ./ 2 .* c .* (S2_ + (R_ - expo_ .* S2_).^2 ) ) ) ./ Z;
+            prior.var_mess = max(1e-18, f_b - prior.av_mess.^2);
+            % learn to do : all
+            prior.Z = Z;
+            if (prior.learn == 1)
+                %                 Z_rho = (1 - rho_) .* a ./ sqrt(2 .* pi .* S2_) + (prior.av_mess - rho_ .* sqrt(S2_ ./ (2 .* pi) .* a) ) ./ (R_ - expo_ .* S2_);
+                %                 prior.rho = prior.dump_learn .* prior.rho + (1 - prior.dump_learn) .* abs(((prior.av_mess - rho_ .* sqrt(S2_ ./ (2 .* pi) .* a) ) ./ (R_ - expo_ .* S2_) * Z_rho.^(-1)') ./ (a ./ sqrt(2 .* pi .* S2_) * Z_rho.^(-1)') );
+                prior.param_1 = prior.dump_learn .* prior.param_1 + (1 - prior.dump_learn) .* sqrt(rho_ .* N_ ./ sum(prior.av_mess) );
+                if (prior.rho > prior.alpha); prior.rho = prior.alpha; end;
+            end
         end
         
         function prior = PriorSC(prior)
@@ -278,6 +320,20 @@ classdef Prior
             prior.var_mess = max(1e-18, (rho_ ./ Z .* S2_ ./ (S2_ + var_gauss) .* (2 .* chi2 + abs(M).^2) .* exp(-alpha_ ./ 2) - abs(prior.av_mess).^2) ./ 2);
             prior.var_mess(~isfinite(prior.var_mess) ) = 0;
             % learn to do : all
+        end
+        
+        function prior = PriorSuperCode(prior)
+            R_ = prior.R; S2_ = prior.S2;
+            prior.av_mess_old = prior.av_mess;
+            % different non zero values
+            termExp = exp((2 .* R_ - prior.param_3) ./ (2 .* S2_) );
+            termResh = reshape(termExp, prior.param_1, []);
+            term2Resh = ones(prior.param_1, 1) * sum(termResh);
+            term3Resh = termResh ./ term2Resh;
+            term3 = reshape(term3Resh, size(prior.av_mess) );
+            prior.av_mess = term3 .* prior.param_3;
+            prior.var_mess = max(0, prior.av_mess .* (1 - prior.av_mess) .* prior.param_3.^2);
+            % nothing to learn
         end
         
     end

@@ -8,9 +8,15 @@ initialisation();
 prior = Prior(opt.signal_rho, N, measure_rate, opt.learn, opt.prior, opt.dump_learn, R_init, S2_init, av_mess_init, var_mess_init, opt.method, prior_param{1}, prior_param{2}, prior_param{3}, prior_param{4}); F = str2func(prior.func);
 n_and_e = noise_and_error(opt.conv, opt.var_noise, opt.dump_learn);
 
-t = 1; print_to_screen();
+t = 1;
+% print infos to screen
+if (opt.print >= 1); print_to_screen(); end
 % initial error (should be rho)
-if (max(size(opt.signal) ) > 2); n_and_e = n_and_e.compute_true_MSE(opt.signal,prior.av_mess); MSEt(t) = n_and_e.true_error; end
+if (max(size(opt.signal) ) > 2);
+    if(strcmp(opt.prior, 'SuperpositionCode') == 0); n_and_e = n_and_e.compute_true_MSE(opt.signal,prior.av_mess);
+    else n_and_e = n_and_e.compute_true_SER(opt.signal,prior.av_mess,opt.NbSC,opt.nonZeroValues); end;
+    MSEt(t) = n_and_e.true_error;
+end
 % initial MSE by block
 if ((opt.MSEbyBlock > 0) && (mod(t, opt.MSEbyBlock) == 0) && (opt.numBlockC > 1) ); MSEblocks{t} = MSEbyBloc(prior.av_mess, opt.signal, opt.numBlockC, opt.Nblock); end
 
@@ -32,7 +38,8 @@ while (t <= opt.nb_iter)
     
     % Test of reconstruction on the fly knowing the original signal
     if (max(size(opt.signal) ) > 2)
-        n_and_e = n_and_e.compute_true_MSE(opt.signal,prior.av_mess);
+        if(strcmp(opt.prior, 'SuperpositionCode') == 0); n_and_e = n_and_e.compute_true_MSE(opt.signal,prior.av_mess);
+        else n_and_e = n_and_e.compute_true_SER(opt.signal,prior.av_mess,opt.NbSC,opt.nonZeroValues); end;
         if ((n_and_e.true_error < opt.conv) ); fprintf('Solution found, true error = %e',n_and_e.true_error); break; end;
     end
     
@@ -53,7 +60,7 @@ while (t <= opt.nb_iter)
     % MSE as a function of the iterations, to be compared with density evolution
     if (max(size(opt.signal) ) > 2)
         MSEt(t + 1) = n_and_e.true_error;
-        %         if ((isnan(n_and_e.true_error) == 1) || (n_and_e.true_error > 1e5) ); error('The algorithm did not converge'); end
+        if ((isnan(n_and_e.true_error) == 1) || (n_and_e.true_error > 1e5) ); error('The algorithm did not converge'); end
     end
     
     t = t + 1;
@@ -66,7 +73,7 @@ close(gcf);
 varargout{1} = prior;
 varargout{2} = n_and_e;
 if (max(size(opt.signal) ) > 2); varargout{3} = MSEt; end
-if ((opt.MSEbyBlock > 0) && (opt.numBlockC > 1) ); varargout{4} = MSEblocks; end
+if ((opt.MSEbyBlock > 0) && (opt.numBlockC > 1) ); varargout{4} = MSEblocks; else varargout{4} = []; end
 
 X = prior.av_mess;
 

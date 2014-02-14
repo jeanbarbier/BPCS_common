@@ -4,7 +4,7 @@
 % For the signal, each component is i.i.d with p(x) = (1 - rho) *
 % delta(x) + rho * ComplexNormal(x | mGauss, varGauss).
 % The imaginary part is zero in the real case.
-% The final estimated signal is results.av_mess
+% The final estimated signal is X
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% PROBLEM AND PARAMETERS DEFINITION
 
@@ -24,8 +24,8 @@ var_noise = 0; % noise variance
 My = CSBP_Solver_Opt();
 My.nb_iter = 300; % max number of iterations
 My.print = 1; % frequency of printing results
-My.conv = 1e-10; % convergence accuracy
-My.dump_mes = 0.5; % dumping
+My.conv = 1e-6; % convergence accuracy
+My.dump_mes = 0.; % dumping (help to make the algorithm converge, but the Density Evolution will not agree anymore)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%% NO MODIFICATIONS AFTER THIS LINE ARE REQUIRED
 
@@ -62,7 +62,7 @@ else Y = MultSeededHadamard(S, J, numBlockL, numBlockC, Mblock, Nblock, rp, flip
 if (My.var_noise > 0); Y = Y + randn(size(Y) ) .* sqrt(My.var_noise); end
 
 %% reconstruction
-tic; [results, n_and_e, MSEtAlgo, MSEblockAlgo] = CSBP_Solver(Y, [], My); toc;
+tic; [X, results, n_and_e, MSEtAlgo] = CSBP_Solver(Y, [], My); toc;
 
 %% density evolution
 plotDensityEvolutionHadamardFourier(); drawnow; hold on;
@@ -74,7 +74,7 @@ if ((N <= 2^15) && (trueMat == 1) )
     G = createSeededRandomMatrix(type, J, Mblock, Nblock); % creation of the seeded matrix
     Y = G * S.'; % measure
     if (My.var_noise > 0); Y = Y + randn(size(Y) ) .* sqrt(My.var_noise); end
-    tic; [results, n_and_eR, MSEtAlgoR, MSEblockAlgoR] = CSBP_Solver(Y, G, My); toc; % reconstruction
+    tic; [X2, results, n_and_eR, MSEtAlgoR] = CSBP_Solver(Y, G, My); toc; % reconstruction
     plot_(3) = semilogy(MSEtAlgoR(:), 'om'); % plot
     
     if (strcmp('real', type) ); legend(plot_([1,3,2]), 'Hadamard', 'Random', 'Density evolution');
