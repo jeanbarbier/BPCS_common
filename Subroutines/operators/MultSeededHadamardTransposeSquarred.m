@@ -1,8 +1,7 @@
 function [Z] = MultSeededHadamardTransposeSquarred(X, J, numBlockL, numBlockC, Mblock, Nblock)
 % Multiplication of a squarred seeded Hadamard transposed operator with a vector
 
-if (isrow(X) ); X = X'; X = [X; zeros(Nblock, 1)];
-else X = [X; zeros(Nblock, 1)]; end
+if (isrow(X) ); X = X'; end
 Z = zeros(numBlockC * Nblock, 1);
 
 lastZ = 1;
@@ -12,14 +11,17 @@ for c = 1 : numBlockC
     else u = 1; end;
     
     Y = 0;
-    for l = c - 1 : numBlockL
+    l = c - 1;
+    while (l <= numBlockL)
         
         if (c == 1); l = l + 1; l = min(l, numBlockL); end
         
         if (J(l, c) == 0); break; end
         
-        Y = Y + J(l, c) * sum(X(u : u + Mblock(l) - 1) ) * ones(Nblock, 1);
+        Y = Y + J(l, c) * sum(X(u : min(end, u + Mblock(l) - 1) ) ) * ones(Nblock, 1);
         u = u + Mblock(l);
+        
+        l = l + 1;
     end
     
     Z(lastZ : lastZ + Nblock - 1) = Y;

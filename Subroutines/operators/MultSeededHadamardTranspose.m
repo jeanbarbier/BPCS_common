@@ -1,8 +1,7 @@
 function [Z] = MultSeededHadamardTranspose(X, J, numBlockL, numBlockC, Mblock, Nblock, rp, noBlockError)
 % Multiplication of a seeded Hadamard transposed operator with a vector
 
-if (isrow(X) ); X = X'; X = [X; zeros(10 * Nblock, 1)];
-else X = [X; zeros(10 * Nblock, 1)]; end
+if (isrow(X) ); X = X'; end
 
 Z = zeros(numBlockC * Nblock, 1);
 ZZ = Z;
@@ -15,15 +14,20 @@ for c = 1 : numBlockC
     else u = 1; end;
     
     Y = 0; YY = 0;
-    for l = c - 1 : numBlockL
+    l = c - 1;
+    while (l <= numBlockL)
         
         if (c == 1); l = l + 1; l = min(l, numBlockL); end
         
         if (J(l, c) == 0); break; end
         
         XX = zero;
-        S = X(u : u + Nblock - 1);
-        XX(rp{l, c}(1 : Mblock(l) ) ) = S(1 : Mblock(l) );
+        if (numBlockC > 1) S = X(u : min(end, u + Nblock - 1) );
+        else S = X(u : end); end
+        msS = max(size(S) );
+        
+        if (numBlockC > 1) XX(rp{l, c}(1 : min(msS, Mblock(l) ) ) ) = S(1 : min(msS, Mblock(l) ) );
+        else XX(rp{l, c}(1 : msS ) ) = S(1 : msS); end
         
         Y = Y + sqrt(J(l, c) ) * hadamards(XX);
         u = u + Mblock(l);
@@ -34,6 +38,7 @@ for c = 1 : numBlockC
             YY = YY + sqrt(J(l, c) ) * hadamards(XXX);
         end
         
+        l = l + 1;
     end
     
     Z(lastZ : lastZ + Nblock - 1) = Y;
