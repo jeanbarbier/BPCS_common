@@ -295,8 +295,8 @@ classdef Prior
             % L1 optimization (soft tresholding) : p(x) ~ lim_{beta -> infinity} exp{-beta * |x|}, where the x values are bounded by [min, max] : param_1 = min; param_2 = max;
             prior.av_mess_old = prior.av_mess; min_ = prior.param_1; max_ = prior.param_2;
             R_ = prior.R; S2_ = prior.S2;
-            prior.av_mess = min(max_, (R_ - S2_) .* (R_ > S2_) ) + max(min_, (R_ + S2_) .* (R_ < -S2_) );
-            prior.var_mess = S2_ .* (((min_ < R_ + S2_) && (R_ < -S2_) ) || ((R_ > S2_) && (R_ - S2_ < max_) ) );
+            prior.av_mess = min(max_,(R_ > 0) .* (R_ - S2_) .* (R_ > S2_) ) + max(min_,(R_ < 0) .* (R_ + S2_) .* (-R_ > S2_) );
+            prior.var_mess = S2 * (( (min < R + S2) && (R < -S2) ) || ( (R > S2) && (R - S2 < max) ));
             % nothing to learn
         end
         
