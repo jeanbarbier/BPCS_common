@@ -22,7 +22,7 @@ alphaGlobal = 0.2; % global measurement rate (the true rate will be a little bit
 numBlockC = 8; % number of blocks (must be >= 2) for the columns of the seeding matrix, it must divide N (POWER OF 2 if type = 'real')
 w = 1; % coupling window (number of sub-diagonal blocks)
 JJ = 0.1.^2; % coupling variance (not rescaled by N, this will be done automatically)
-numBlockL = numBlockC + w - 1; % number of blocks for the rows of the seeding matrix
+numBlockL = numBlockC + max(0, w - 1); % number of blocks for the rows of the seeding matrix
 alphaCs(1) = 0.1 + line_BP(2, closest); % measurement rate 1st block/seed, taken into acount if numBlockC > 1 : can be modified
 alphaCs(2 : numBlockL) = (numBlockC .* alphaGlobal - alphaCs(1) ) ./ (numBlockL - 1); % measurement rate of the bulk blocks : not to be modified
 trueMat = 1; % want to compare with true random matrix (1/0)? (for size N <= 2^15)

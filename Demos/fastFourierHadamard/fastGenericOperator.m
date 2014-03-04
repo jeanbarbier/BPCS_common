@@ -12,7 +12,7 @@ close all; clear; load line_BP.mat;
 
 %% problem parameters
 type = 'complex'; % type of the signal : 'real' (will use an Hadamard based operator) or 'complex' (will use a Fourier based operator)
-N = 2^14; % size of the signal (POWER OF 2 if type = 'real')
+N = 2^12; % size of the signal (POWER OF 2 if type = 'real')
 rho = 0.1; % ..and it's density/sparsity
 [a, closest] = min(abs(rho - line_BP(1,:) ) );
 mGauss = 0; % mean of the real signal or of the real and imaginary parts of the complex one
@@ -21,7 +21,7 @@ alphaGlobal = 0.25; % global measurement rate (the true rate will be a little bi
 numBlockC = 4; % number of blocks for the columns of the seeding matrix ( >= 2 for seeding, = 1 for full operator), it must divide N (POWER OF 2 if type = 'real')
 w = 1; % coupling window (number of sub-diagonal blocks)
 if (numBlockC == 1); JJ = 1; else JJ = 0.1^2; end % variance of the elements of the blocks/coupling strenght
-if (numBlockC == 1); numBlockL = 1; else numBlockL = numBlockC + w - 1; end % number of blocks for the rows of the seeding matrix
+if (numBlockC == 1); numBlockL = 1; else numBlockL = numBlockC + max(0, w - 1); end % number of blocks for the rows of the seeding matrix
 if (numBlockC == 1); alphaCs(1) = alphaGlobal; else alphaCs(1) = 0.1 + line_BP(2, closest); end % measurement rate 1st block/seed, taken into acount if numBlockC > 1 : can be modified
 if (numBlockC > 1); alphaCs(2 : numBlockL) = (numBlockC .* alphaGlobal - alphaCs(1) ) ./ (numBlockL - 1); end % measurement rate of the bulk blocks, taken into acount if numBlockC > 1 : not to be modified
 trueMat = 1; % want to compare with true random matrix (1/0)? (for size N <= 2^15)
