@@ -8,10 +8,11 @@ lastZ = 0;
 for l = 1 : numBlockL
     
     Y = 0;
-    for c = min(l + 1, numBlockC) : -1 : 1
-        if (J(l, c) == 0); break; end
-        YY = J(l, c) * sum(X((c - 1) * Nblock + 1 : c * Nblock) ) * ones(Mblock(1), 1);
-        Y = Y + YY(1 : Mblock(l) );
+    for c = 1 : numBlockC
+        if (J(l, c) ~= 0)
+            YY = J(l, c) * sum(X((c - 1) * Nblock + 1 : c * Nblock) ) * ones(Mblock(1), 1);
+            Y = Y + YY(1 : Mblock(l) );
+        end
     end
     
     Z(lastZ + 1 : lastZ + Mblock(l) ) = Y;

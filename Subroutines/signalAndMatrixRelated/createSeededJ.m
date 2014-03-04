@@ -4,6 +4,9 @@ function [J] = createSeededJ(numBlockL, numBlockC, JJ, w, N)
 J = zeros(numBlockL, numBlockC);
 ww = [0 : w];
 
+if ((numBlockL >= numBlockC) && (w < numBlockL - numBlockC) ); error('The coupling window w must be >= numBlockL - numBlockC'); end
+if (numBlockL < numBlockC); error('numBlockL must be >= numBlockC'); end
+
 for l = 1 : numBlockL
     
     for c = 1 : numBlockC

@@ -8,10 +8,11 @@ lastZ = 0;
 for l = 1 : numBlockL
     
     Y = 0;
-    for c = min(l + 1, numBlockC) : -1 : 1
-        if (J(l, c) == 0); break; end
-        YY = sqrt(J(l, c) ) * hadamards(X((c - 1) * Nblock + 1 : c * Nblock) );
-        Y = Y + YY(rp{l, c}(1 : Mblock(l) ) );
+    for c = 1 : numBlockC
+        if (J(l, c) ~= 0)
+            YY = sqrt(J(l, c) ) * hadamards(X((c - 1) * Nblock + 1 : c * Nblock) );
+            Y = Y + YY(rp{l, c}(1 : Mblock(l) ) );
+        end
     end
     
     if (max(size(noBlockError) ) > 0); Y(noBlockError{l} ) = -Y(noBlockError{l} ); end
