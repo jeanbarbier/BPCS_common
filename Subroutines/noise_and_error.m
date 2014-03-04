@@ -28,20 +28,13 @@ classdef noise_and_error
         
         % section error rate for superposition codes
         function obj = compute_true_SER(obj,signal,X,varargin)
-            if (max(max(X) ) > 0)
-                Xtrue = reshape(X, varargin{1}, [] );
-                [Y, I] = max(Xtrue);
-                BB = zeros(size(Xtrue) );
-                BB(sub2ind(size(Xtrue), I, 1 : length(I) ) ) = 1;
-                obj.true_error = max(size(X) ) / varargin{1};
-                BB = reshape(BB, size(X) );
-            else
-                BB = X;
-            end
-            obj.true_error = max(size(X) ) / varargin{1};
-            for l = 1 : max(size(X) ) / varargin{1}
-                obj.true_error = obj.true_error - isequal(signal((l - 1) * varargin{1} + 1 : l * varargin{1} ), varargin{2}(l) .* BB((l - 1) * varargin{1} + 1 : l * varargin{1} ) );
-            end
+            Xtrue = reshape(X, varargin{1}, [] );
+            [Y, I] = max(Xtrue);
+            BB = zeros(size(Xtrue) );
+            BB(sub2ind(size(Xtrue), I, 1 : length(I) ) ) = 1;
+            sResh = reshape(signal, varargin{1}, [] );
+            diff = ((sResh ~= 0) ~= BB);
+            obj.true_error = sum(sum(diff) ~= 0);
             obj.true_error = obj.true_error ./ max(size(X) ) .* varargin{1};
         end
         
